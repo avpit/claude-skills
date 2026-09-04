@@ -13,7 +13,8 @@ skills/
 templates/
   git-migrations/
     ado-branch-policy-migration-v2.md   Kept for history.
-    ado-branch-policy-migration-v3.md   Current — use this for new repos.
+    ado-branch-policy-migration-v3.md   Kept for history.
+    ado-branch-policy-migration-v4.md   Current — use this for new repos.
 
 scripts/
   skill_to_cursor_rule.py   Converts a Claude Code SKILL.md into a Cursor AI
@@ -26,7 +27,8 @@ Agent prompts for migrating an Azure DevOps Terraform repo to a standardized
 trunk-based branching model: branch naming, branch policies, PR template,
 monthly dependency-patch automation, and release tagging.
 
-**v3** (current) uses an asymmetric environment deployment model:
+**v4** (current) uses an asymmetric environment deployment model, gated by a
+plan-first workflow:
 
 - Non-prod tiers (dev/qa/uat) deploy from **any branch**, so a patch/feature
   branch can be validated (including a real `terraform apply`) before it
@@ -36,6 +38,13 @@ monthly dependency-patch automation, and release tagging.
   the same tag without rebuilding.
 - `env/*` branches are retired in favor of pipeline-parameterized deploys,
   rather than kept as a forward-only merge chain.
+- The migration itself runs in two hard-gated phases: **Phase 1** audits the
+  repo and produces a report (findings, an action-item checklist split into
+  auto-apply / needs-a-second-confirmation / out-of-scope, and an ordered
+  step-by-step implementation plan) — no changes are made yet. Only after
+  that report is explicitly approved does **Phase 2** execute it, with
+  permission changes and branch deletions requiring their own confirmation
+  even after the overall plan was approved.
 
 Before applying it to a repo, fill in the template's "Required inputs"
 section per repo — org/project/repo, auth scope, current branch state, which
@@ -43,7 +52,9 @@ environment tiers are actually prod-tier, and current pipeline architecture
 (YAML-parameterized vs. classic release with branch filters). Don't reuse
 values from a prior run.
 
-v2 is kept for history; see its diff against v3 for what changed and why.
+v2 and v3 are kept for history; diff them against v4 for what changed and
+why (v3 introduced the asymmetric env model; v4 added the plan-first,
+report-then-execute workflow on top of it).
 
 ## scripts/skill_to_cursor_rule.py
 
